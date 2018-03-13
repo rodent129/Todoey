@@ -11,10 +11,15 @@ import UIKit
 class ToDoListViewController: UITableViewController {
     
     var arrayItem = ["Shopping Crazy", "Eating Crazy", "Going Crazy"]
+    
+    let defaults = UserDefaults.standard
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
+            arrayItem = items
+        }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -51,7 +56,8 @@ class ToDoListViewController: UITableViewController {
             let textFields = alert.textFields
             if let count = textFields?.count, count > 0 {
                 print("Add item: \(String(describing: textFields![0].text))")
-                self.arrayItem.append(textFields![0].text ?? "New Item")
+                self.arrayItem.append(textFields![0].text!)
+                self.defaults.set(self.arrayItem, forKey: "ToDoListArray")
                 self.tableView.reloadData()
             }
         }
