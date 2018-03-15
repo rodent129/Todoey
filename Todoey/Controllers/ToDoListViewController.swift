@@ -7,13 +7,16 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController {
     
     //Init empty item array
     var arrayItem = [Item]()
     
-    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    //let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")/
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,7 +60,9 @@ class ToDoListViewController: UITableViewController {
             let textFields = alert.textFields
             if let count = textFields?.count, count > 0 {
                 print("Add item: \(String(describing: textFields![0].text))")
-                let newItem = Item(title: textFields![0].text!)
+                let newItem = Item(context: self.context)
+                newItem.title = textFields![0].text!
+                newItem.checked = false
                 self.arrayItem.append(newItem)
                 self.saveItems()
                 self.tableView.reloadData()
@@ -73,25 +78,22 @@ class ToDoListViewController: UITableViewController {
     }
     
     func saveItems() {
-        let encoder = PropertyListEncoder()
         do {
-            let data = try encoder.encode(arrayItem)
-            try data.write(to: dataFilePath!)
+            try context.save()
         }
         catch {
-            print("Error encode item array: \(error)")
+            print("Error save item array: \(error)")
         }
     }
     
     func loadItems() {
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                arrayItem = try decoder.decode([Item].self, from: data)
-            }
-            catch {
-                print("Error decode item array: \(error)")
-            }
+        let request: NSFetchRequest<Item> = Item.fetchRequest()
+        
+        do {
+            arrayItem = try context.fetch(request)
+        }
+        catch {
+            print("Error loading item array: \(error)")
         }
     }
 }
