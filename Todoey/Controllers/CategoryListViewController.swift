@@ -37,7 +37,23 @@ class CategoryListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "goToItems", sender: self)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let destinationVC = segue.destination as! ToDoListViewController
         
+        if let indexPath = tableView.indexPathForSelectedRow {
+            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            
+            //It already preloaded the items with this category.
+//            if let itemsSet = destinationVC.selectedCategory?.itemRelationship {
+//                for item in itemsSet.flatMap({ $0 as? Item}) {
+//                    print("item: \(String(describing: item.title))")
+//                }
+//            }
+            
+        }
     }
     
     //MARK: - Data Handle methods
